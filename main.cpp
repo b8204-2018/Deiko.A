@@ -31,10 +31,12 @@ int main() {
     for(int i = 0; i < n; i++)
         std::cin >> arr[i];
 
-    InsertionSort solver;
-    int* solve = solver.doSort(arr, n);
+    SortInterface* solver = new InsertionSort;
+    int* solve = solver->doSort(arr, n);
+    delete solver;
 
     for(int i = 0; i < n; i++)
         std::cout << solve[i] << " ";
+    delete[] solve;
     return 0;
 }
