@@ -8,6 +8,7 @@
 #include <string>
 #include <functional>
 #include <fstream>
+#include <cassert>
 
 using namespace std;
 
@@ -64,163 +65,191 @@ public:
 
 class SolverInterface {
 public:
-	virtual double solve(vector<int>) = 0;
+	virtual vector<double> solve(vector<int>) = 0;
 };
 
 class QuadraticEquationSolver : public SolverInterface {
 public:
-	double solve(vector<int> arg) {
-		double ans = sqrt(arg[1] * arg[1] - 4 * arg[0] * arg[2]);
-		ans = (-1 * arg[1] + ans) / 2 * arg[0];
+	vector<double> solve(vector<int> arg) {
+		assert(arg.size() == 3);
+		vector<double> ans;
+		double dis = arg[1] * arg[1] - 4 * arg[0] * arg[2];
+		if(dis > 0){
+			ans.push_back((-1 * arg[1] + sqrt(dis)) / 2 * arg[0]);
+			ans.push_back((-1 * arg[1] - sqrt(dis)) / 2 * arg[0]);
+		}
+		else if (dis == 0) {
+			ans.push_back((-1 * arg[1]) / 2 * arg[0]);
+		}
 		return ans;
 	};
 };
 
 class SumSolver : public SolverInterface {
 public:
-	double solve(vector<int> arg) {
-		return arg[0] + arg[1];
+	vector<double> solve(vector<int> arg) {
+		assert(arg.size() == 2);
+		vector<double> ans;
+		ans.push_back(arg[0] + arg[1]);
+		return ans;
 	};
 };
 
 class DifSolver : public SolverInterface {
 public:
-	double solve(vector<int> arg) {
-		return arg[0] - arg[1];
+	vector<double> solve(vector<int> arg) {
+		assert(arg.size() == 2);
+		vector<double> ans;
+		ans.push_back(arg[0] - arg[1]);
+		return ans;
 	};
 };
 
 class MulSolver : public SolverInterface {
 public:
-	double solve(vector<int> arg) {
-		return arg[0] * arg[1];
+	vector<double> solve(vector<int> arg) {
+		assert(arg.size() == 2);
+		vector<double> ans;
+		ans.push_back(arg[0] * arg[1]);
+		return ans;
 	};
 };
 
 class DivSolver : public SolverInterface {
 public:
-	double solve(vector<int> arg) {
-		return arg[0] / arg[1];
+	vector<double> solve(vector<int> arg) {
+		assert(arg.size() == 2);
+		vector<double> ans;
+		ans.push_back(arg[0] / arg[1]);
+		return ans;
 	};
 };
 
-class SolverBuilderInterface {
+class UnitInterface {
 public:
-	virtual vector<SolverInterface*> createSolvers() = 0;
-	virtual vector<ParserInterface*> createParsers() = 0;
+	virtual ParserInterface* createParser() = 0;
+	virtual SolverInterface* createSolver() = 0;
 };
 
-class MyBuilder : public SolverBuilderInterface {
+class QEUnit : public UnitInterface {
 public:
-	vector<SolverInterface*> createSolvers() {
-		vector<SolverInterface*> temp;
-		temp.push_back(new QuadraticEquationSolver);
-		temp.push_back(new SumSolver);
-		temp.push_back(new DifSolver);
-		temp.push_back(new MulSolver);
-		temp.push_back(new DivSolver);
-		return temp;
+	ParserInterface* createParser() {
+		return new EquationParser;
 	};
-	vector<ParserInterface*> createParsers() {
-		vector<ParserInterface*> temp;
-		temp.push_back(new EquationParser);
-		temp.push_back(new TermParser);
-		temp.push_back(new TermParser);
-		temp.push_back(new TermParser);
-		temp.push_back(new TermParser);
+	SolverInterface* createSolver() {
+		return new QuadraticEquationSolver;
+	};
+};
+
+class SumUnit : public UnitInterface {
+public:
+	ParserInterface* createParser() {
+		return new TermParser;
+	};
+	SolverInterface* createSolver() {
+		return new SumSolver;
+	};
+};
+
+class DifUnit : public SumUnit {
+public:
+	SolverInterface* createSolver() {
+		return new DifSolver;
+	};
+};
+
+class MulUnit : public SumUnit {
+public:
+	SolverInterface* createSolver() {
+		return new MulSolver;
+	};
+};
+
+class DivUnit : public SumUnit {
+public:
+	SolverInterface* createSolver() {
+		return new DivSolver;
+	};
+};
+
+class UnitFactoryInterface {
+public:
+	virtual vector<UnitInterface*> createUnits() = 0;
+};
+
+class MyUFactory : public UnitFactoryInterface {
+public:
+	vector<UnitInterface*> createUnits() {
+		vector<UnitInterface*> temp;
+		temp.push_back(new QEUnit);
+		temp.push_back(new SumUnit);
+		temp.push_back(new DifUnit);
+		temp.push_back(new MulUnit);
+		temp.push_back(new DivUnit);
 		return temp;
 	}
 };
 
 class TaskSolver {
-	SolverBuilderInterface* builder;
-	vector<SolverInterface*> solvers;
-	vector<ParserInterface*> parsers;
+	vector<UnitInterface*> units;
 public:
 	TaskSolver() {};
-	TaskSolver(SolverBuilderInterface* _builder) {
-		builder = _builder;
-		solvers = builder->createSolvers();
-		parsers = builder->createParsers();
+	TaskSolver(UnitFactoryInterface* unit) {
+		units = unit->createUnits();
 	};
 	~TaskSolver() {
-		for (int i = 0; i < solvers.size(); i++) {
-			delete solvers[i];
-		}
-		for (int i = 0; i < parsers.size(); i++) {
-			delete parsers[i];
+		for (int i = 0; i < units.size(); i++) {
+			delete units[i];
 		}
 	}
-	double getAnswerByType(int type, string str) {
-		if (type >= solvers.size()) {
-			//exeption
-			return 0;
-		}
-		vector<int> arg = parsers[type]->parse(str);
-		double answer = solvers[type]->solve(arg);
+	vector<double> getAnswerByType(size_t type, string str) {
+		assert(type < units.size());
+		ParserInterface* parser = units[type]->createParser();
+		vector<int> arg = parser->parse(str);
+		delete parser;
+
+		SolverInterface* solver = units[type]->createSolver();
+		vector<double> answer = solver->solve(arg);
+		delete solver;
+
 		return answer;
 	};
 };
 
-class Reader {
-	string input;
-	int type;
-	string example;
+class ExampleReader {
 public:
-	Reader() {};
-	Reader(string fileName) {
-		setFile(fileName);
-	}
-	void setFile(string fileName) {
-		input = fileName;
-	}
-	void read() {
+	pair<int, string> read(string input) {
+		int type;
+		string example;
 		ifstream fin(input);
 		fin >> type;
 		fin >> example;
 		fin.close();
-	}
-	int getType() {
-		return type;
-	}
-	string getString() {
-		return example;
+		return make_pair(type, example);
 	}
 };
 
-class Writer {
-	string output;
-	double solution;
+class AnswerWriter {
 public:
-	Writer() {};
-	Writer(string fileName) {
-		setFile(fileName);
-	}
-	void setFile(string fileName) {
-		output = fileName;
-	}
-	void setSolution(double _solution) {
-		solution = _solution;
-	}
-	void write() {
+	void write(string output, vector<double> solution) {
 		ofstream fout(output);
-		fout << solution;
+		for(size_t i = 0; i < solution.size(); i++)
+			fout << solution[i] << " ";
 		fout.close();
 	}
 };
 
 int main()
 {
-	Reader reader("input.txt");
-	reader.read();
+	ExampleReader reader;
+	pair<int, string> ex = reader.read("input.txt");
 
-	SolverBuilderInterface* mybuilder = new MyBuilder;
-	TaskSolver mysolver(mybuilder);
+	UnitFactoryInterface* MyFact = new MyUFactory;
+	TaskSolver mysolver(MyFact);
 
-	double ans = mysolver.getAnswerByType(reader.getType(), reader.getString());
+	vector<double> ans = mysolver.getAnswerByType(ex.first, ex.second);
 
-	Writer writer("output.txt");
-	writer.setSolution(ans);
-	writer.write();
+	AnswerWriter writer;
+	writer.write("output.txt", ans);
 	return 0;
 }
