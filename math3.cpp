@@ -72,19 +72,14 @@ class QuadraticEquationSolver : public SolverInterface {
 public:
 	vector<double> solve(vector<int> arg) {
 		vector<double> ans;
-		try {
-			if (arg.size() != 3) throw invalid_argument("There are not three arguments");
-			double dis = arg[1] * arg[1] - 4 * arg[0] * arg[2];
-			if (dis > 0) {
-				ans.push_back((-1 * arg[1] + sqrt(dis)) / 2 * arg[0]);
-				ans.push_back((-1 * arg[1] - sqrt(dis)) / 2 * arg[0]);
-			}
-			else if (dis == 0) {
-				ans.push_back((-1 * arg[1]) / 2 * arg[0]);
-			}
+		if (arg.size() != 3) throw invalid_argument("There are not three arguments");
+		double dis = arg[1] * arg[1] - 4 * arg[0] * arg[2];
+		if (dis > 0) {
+			ans.push_back((-1 * arg[1] + sqrt(dis)) / 2 * arg[0]);
+			ans.push_back((-1 * arg[1] - sqrt(dis)) / 2 * arg[0]);
 		}
-		catch (invalid_argument &e) {
-			cerr << e.what() << endl;
+		else if (dis == 0) {
+			ans.push_back((-1 * arg[1]) / 2 * arg[0]);
 		}
 		return ans;
 	};
@@ -94,13 +89,8 @@ class SumSolver : public SolverInterface {
 public:
 	vector<double> solve(vector<int> arg) {
 		vector<double> ans;
-		try {
-			if (arg.size() != 2) throw invalid_argument("There are not two arguments");
-			ans.push_back(arg[0] + arg[1]);
-		}
-		catch (invalid_argument &e) {
-			cerr << e.what() << endl;
-		}
+		if (arg.size() != 2) throw invalid_argument("There are not two arguments");
+		ans.push_back(arg[0] + arg[1]);
 		return ans;
 	};
 };
@@ -109,13 +99,8 @@ class DifSolver : public SolverInterface {
 public:
 	vector<double> solve(vector<int> arg) {
 		vector<double> ans;
-		try {
-			if (arg.size() != 2) throw invalid_argument("There are not two arguments");
-			ans.push_back(arg[0] - arg[1]);
-		}
-		catch (invalid_argument &e) {
-			cerr << e.what() << endl;
-		}
+		if (arg.size() != 2) throw invalid_argument("There are not two arguments");
+		ans.push_back(arg[0] - arg[1]);
 		return ans;
 	};
 };
@@ -124,13 +109,8 @@ class MulSolver : public SolverInterface {
 public:
 	vector<double> solve(vector<int> arg) {
 		vector<double> ans;
-		try {
-			if (arg.size() != 2) throw invalid_argument("There are not two arguments");
-			ans.push_back(arg[0] * arg[1]);
-		}
-		catch (invalid_argument &e) {
-			cerr << e.what() << endl;
-		}
+		if (arg.size() != 2) throw invalid_argument("There are not two arguments");
+		ans.push_back(arg[0] * arg[1]);
 		return ans;
 	};
 };
@@ -139,13 +119,8 @@ class DivSolver : public SolverInterface {
 public:
 	vector<double> solve(vector<int> arg) {
 		vector<double> ans;
-		try {
-			if (arg.size() != 2) throw invalid_argument("There are not two arguments");
-			ans.push_back(arg[0] / arg[1]);
-		}
-		catch (invalid_argument &e) {
-			cerr << e.what() << endl;
-		}
+		if (arg.size() != 2) throw invalid_argument("There are not two arguments");
+		ans.push_back(arg[0] / arg[1]);
 		return ans;
 	};
 };
@@ -233,19 +208,14 @@ public:
 	}
 	vector<double> getAnswerByType(size_t type, string str) {
 		vector<double> answer;
-		try {
-			if (type >= units.size()) throw invalid_argument("Wrong type");
-			ParserInterface* parser = units[type]->createParser();
-			vector<int> arg = parser->parse(str);
-			delete parser;
+		if (type >= units.size()) throw invalid_argument("Wrong type");
+		ParserInterface* parser = units[type]->createParser();
+		vector<int> arg = parser->parse(str);
+		delete parser;
 
-			SolverInterface* solver = units[type]->createSolver();
-			answer = solver->solve(arg);
-			delete solver;
-		}
-		catch (invalid_argument &e) {
-			cerr << e.what() << endl;
-		}
+		SolverInterface* solver = units[type]->createSolver();
+		answer = solver->solve(arg);
+		delete solver;
 		return answer;
 	};
 };
@@ -280,8 +250,13 @@ int main()
 
 	UnitFactoryInterface* MyFact = new MyUFactory;
 	TaskSolver mysolver(MyFact);
-
-	vector<double> ans = mysolver.getAnswerByType(ex.first, ex.second);
+	vector<double> ans;
+	try {
+		ans = mysolver.getAnswerByType(ex.first, ex.second);
+	}
+	catch (invalid_argument &e) {
+		cerr << e.what() << endl;
+	}
 
 	AnswerWriter writer;
 	writer.write("output.txt", ans);
