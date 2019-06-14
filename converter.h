@@ -121,7 +121,7 @@ vector<OperationInterface*> ConverterRPN::convertToRPN(vector<TokenInterface*> e
         }
         else if (expr[i]->isInfix()){
             int operPriority = expr[i]->getPriority();
-            while (stack.size() > 0 && (stack.back()->getPriority() > operPriority || stack.back()->isPrefix())){
+            while (stack.size() > 0 && (stack.back()->getPriority() >= operPriority || stack.back()->isPrefix())){
                 TokenInterface* temp = stack.back();
                 stack.pop_back();
                 out.push_back(temp->getOp());

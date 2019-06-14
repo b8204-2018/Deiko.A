@@ -24,8 +24,10 @@ public:
         for (size_t i = 0; i < str.size(); ++i) {
             char c = str[i];
             if (isdigit(c)) continue;
-            if (c == '.' && !dotFlag)
-                dotFlag = true;
+			if (c == '.' && !dotFlag) {
+				dotFlag = true;
+				continue;
+			}
             return false;
         }
         return true;

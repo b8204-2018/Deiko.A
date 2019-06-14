@@ -38,6 +38,7 @@ public:
         string temp;
         for (int i = 0; i < RPN.size(); ++i) {
             temp += RPN[i]->gerValue();
+			temp += " ";
         }
         return temp;
     }

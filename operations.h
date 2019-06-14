@@ -49,8 +49,8 @@ public:
         value = _value;
     }
     string doOp(vector<string> arg) override {
-        double A = stod(arg[0]);
-        double B = stod(arg[1]);
+        double A = stod(arg[1]);
+        double B = stod(arg[0]);
         if (arg.size() != numbOfOperands())
             throw invalid_argument("there is no two arguments");
         double ans = A + B;
@@ -66,8 +66,8 @@ public:
         value = _value;
     }
     string doOp(vector<string> arg) override {
-        double A = stod(arg[0]);
-        double B = stod(arg[1]);
+		double A = stod(arg[1]);
+		double B = stod(arg[0]);
         if (arg.size() != numbOfOperands())
             throw invalid_argument("there is no two arguments");
         double ans = A - B;
@@ -83,8 +83,8 @@ public:
         value = _value;
     }
     string doOp(vector<string> arg) override {
-        double A = stod(arg[0]);
-        double B = stod(arg[1]);
+		double A = stod(arg[1]);
+		double B = stod(arg[0]);
         if (arg.size() != numbOfOperands())
             throw invalid_argument("there is no two arguments");
         double ans = A * B;
@@ -100,8 +100,8 @@ public:
         value = _value;
     }
     string doOp(vector<string> arg) override {
-        double A = stod(arg[0]);
-        double B = stod(arg[1]);
+		double A = stod(arg[1]);
+		double B = stod(arg[0]);
         if (arg.size() != numbOfOperands())
             throw invalid_argument("there is no two arguments");
         double ans = A / B;
