@@ -21,7 +21,8 @@ public:
 class NumberChecker : public TokenCheckerInterface {
 public:
     bool check(string str) override {
-		return regex_match(str, regex("([0-9])+\.([0-9])+"));
+		bool flag = regex_match(str, regex("([0-9])+\\.([0-9])*")) || regex_match(str, regex("([0-9])+"));
+		return flag;
     }
     TokenInterface* getToken(string str){
         return new NumberToken(str);
