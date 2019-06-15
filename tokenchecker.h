@@ -3,6 +3,7 @@
 //
 
 #include <string>
+#include <regex>
 
 #include "token.h"
 
@@ -20,17 +21,7 @@ public:
 class NumberChecker : public TokenCheckerInterface {
 public:
     bool check(string str) override {
-        bool dotFlag = false;
-        for (size_t i = 0; i < str.size(); ++i) {
-            char c = str[i];
-            if (isdigit(c)) continue;
-			if (c == '.' && !dotFlag) {
-				dotFlag = true;
-				continue;
-			}
-            return false;
-        }
-        return true;
+		return regex_match(str, regex("([0-9])+\.([0-9])+"));
     }
     TokenInterface* getToken(string str){
         return new NumberToken(str);

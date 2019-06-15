@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "stack.h"
 #include "tokenchecker.h"
 
 using namespace std;
