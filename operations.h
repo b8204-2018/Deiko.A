@@ -104,6 +104,8 @@ public:
 		double B = stod(arg[0]);
         if (arg.size() != numbOfOperands())
             throw invalid_argument("there is no two arguments");
+		if (B == 0)
+			throw invalid_argument("division by zero");
         double ans = A / B;
         ostringstream strm;
         strm << ans;

@@ -13,17 +13,17 @@ using namespace std;
 #define OPN_CLION_MYPARSER_H
 
 class RPNSolver {
-    vector<OperationInterface*> RPN;
 public:
-    RPNSolver(vector<OperationInterface*> _RPN = {}){
-        RPN = _RPN;
+    RPNSolver(){
     }
-    string GetSolution(){
+    double GetSolution(vector<OperationInterface*> RPN){
+		if (RPN.size() == 0)
+			throw invalid_argument("empty rpn");
         vector<string> stack;
         vector<string> args;
         for (int i = 0; i < RPN.size(); ++i) {
             for (int j = 0; j < RPN[i]->numbOfOperands(); ++j) {
-                if (stack.size() == 0) throw logic_error("something went wrong; out of range");
+                if (stack.size() == 0) throw invalid_argument("stack out of range");
                 string temp = stack.back();
                 stack.pop_back();
                 args.push_back(temp);
@@ -32,10 +32,11 @@ public:
             stack.push_back(temp);
             args.clear();
         }
-        return stack.back();
+		double ans = stod(stack.back());
+        return ans;
     }
-    string gerRNP(){
-        string temp;
+    string gerRNP(vector<OperationInterface*> RPN){
+        string temp = "";
         for (int i = 0; i < RPN.size(); ++i) {
             temp += RPN[i]->gerValue();
 			temp += " ";

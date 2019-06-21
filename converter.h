@@ -15,25 +15,23 @@ using namespace std;
 
 class ConverterInterface {
 public:
-    virtual vector<OperationInterface*> getExpr() = 0;
+    virtual vector<OperationInterface*> getExpr(string) = 0;
 };
 
 class ConverterRPN : public ConverterInterface {
-    vector<TokenInterface*> exp;
-    vector<OperationInterface*> RPN;
     BigChecker* RPNChecker;
     vector<TokenInterface*> splitThis(string);
     vector<OperationInterface*> convertToRPN(vector<TokenInterface*>);
     string deleteSpaces(string);
 public:
-    ConverterRPN(CheckerCollectionInterface* checkers = nullptr, string input = ""){
-        //cout << "gag";
-        //if(checkers == nullptr) cout << "sas";
+    ConverterRPN(CheckerCollectionInterface* checkers = nullptr){
         RPNChecker = new BigChecker(checkers);
-        exp = splitThis(input);
-        RPN = convertToRPN(exp);
     };
-    vector<OperationInterface*> getExpr() override {
+    vector<OperationInterface*> getExpr(string input) override {
+		vector<TokenInterface*> exp;
+		vector<OperationInterface*> RPN;
+		exp = splitThis(input);
+		RPN = convertToRPN(exp);
         return RPN;
     }
 };

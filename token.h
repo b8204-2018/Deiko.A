@@ -149,4 +149,15 @@ public:
     }
 };
 
+class PostfixFunc : public TokenInterface {
+public:
+	bool isNumber() override { return false; };
+	bool isPrefix() override { return false; };
+	bool isInfix() override { return false; };
+	bool isPostfix() override { return true; };
+	bool isOpenBr() override { return false; };
+	bool isCloseBr() override { return false; };
+	bool isVirgule() override { return false; };
+};
+
 #endif //OPN_CLION_CHECKER_H

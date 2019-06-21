@@ -109,7 +109,6 @@ public:
     }
 };
 
-
 class BigChecker{
     vector<TokenCheckerInterface*> checkers;
 public:
@@ -136,6 +135,5 @@ public:
     }
 
 };
-
 
 #endif //OPN_CLION_TOKEN_H
