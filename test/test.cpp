@@ -3,113 +3,76 @@
 #include "../../solver.h"
 #include "../../converter.h"
 
+CheckerCollection* col = CheckerCollection::getBasics();
+ConverterRPN conv(col);
+RPNSolver sol;
+vector<OperationInterface*> rpn;
+string expr;
+
 TEST(InvalidExpr, EmptyString) {
-	CheckerCollectionInterface* col = new MyCheckerCollection();
-	string expr = "";
-	ConverterRPN conv(col);
-	ASSERT_NO_THROW(conv.getExpr(expr));
-	vector<OperationInterface*> rpn = conv.getExpr(expr);
-	RPNSolver sol;
+	expr = "";
+	rpn = conv.getExpr(expr);
 	ASSERT_THROW(sol.GetSolution(rpn), invalid_argument);
 }
 
 TEST(InvalidExpr, InvalidSymbol) {
-	CheckerCollectionInterface* col = new MyCheckerCollection();
-	string expr = "25#13"; 
-	ConverterRPN conv(col);
+	expr = "25#13"; 
 	ASSERT_THROW(conv.getExpr(expr), invalid_argument);
 }
 
 TEST(InvalidExpr, ExtraBrackets) {
-	CheckerCollectionInterface* col = new MyCheckerCollection();
-	string expr = "25+13)";
-	ConverterRPN conv(col);
+	expr = "25+13)";
 	ASSERT_THROW(conv.getExpr(expr), invalid_argument);
 	expr = "(25+13";
 	ASSERT_THROW(conv.getExpr(expr), invalid_argument);
 }
 
 TEST(Calculation, RealNumbers) {
-	CheckerCollectionInterface* col = new MyCheckerCollection();
-	string expr = "(2.3+2.7-4.0+9.00)/(5*0.2)";
-	ConverterRPN conv(col);
-	ASSERT_NO_THROW(conv.getExpr(expr));
-	vector<OperationInterface*> rpn = conv.getExpr(expr);
-	RPNSolver sol;
-	ASSERT_NO_THROW(sol.GetSolution(rpn));
+	expr = "(2.3+2.7-4.0+9.00)/(5*0.2)";
+	rpn = conv.getExpr(expr);
 	EXPECT_EQ(sol.GetSolution(rpn), 10);
 }
 
 TEST(Calculation, NoBrackets_EqualPriorities) {
-	CheckerCollectionInterface* col = new MyCheckerCollection();
-	string expr = "15-10+5";
-	ConverterRPN conv(col);
-	ASSERT_NO_THROW(conv.getExpr(expr));
-	vector<OperationInterface*> rpn = conv.getExpr(expr);
-	RPNSolver sol;
-	ASSERT_NO_THROW(sol.GetSolution(rpn));
+	expr = "15-10+5";
+	rpn = conv.getExpr(expr);
 	EXPECT_EQ(sol.GetSolution(rpn), 10);
 }
 
 
 TEST(Calculation, NoBrackets_NotEqualPriorities) {
-	CheckerCollectionInterface* col = new MyCheckerCollection();
-	string expr = "2+2*2";
-	ConverterRPN conv(col);
-	ASSERT_NO_THROW(conv.getExpr(expr));
-	vector<OperationInterface*> rpn = conv.getExpr(expr);
-	RPNSolver sol;
-	ASSERT_NO_THROW(sol.GetSolution(rpn));
+	expr = "2+2*2";
+	rpn = conv.getExpr(expr);
 	EXPECT_EQ(sol.GetSolution(rpn), 6);
 
 	expr = "2*2+2";
-	ASSERT_NO_THROW(conv.getExpr(expr));
 	rpn = conv.getExpr(expr);
-	ASSERT_NO_THROW(sol.GetSolution(rpn));
 	EXPECT_EQ(sol.GetSolution(rpn), 6);
 }
 
 TEST(Calculation, Brackets_EqualPriorities) {
-	CheckerCollectionInterface* col = new MyCheckerCollection();
-	string expr = "15-(10+5)";
-	ConverterRPN conv(col);
-	ASSERT_NO_THROW(conv.getExpr(expr));
-	vector<OperationInterface*> rpn = conv.getExpr(expr);
-	RPNSolver sol;
-	ASSERT_NO_THROW(sol.GetSolution(rpn));
+	expr = "15-(10+5)";
+	rpn = conv.getExpr(expr);
 	EXPECT_EQ(sol.GetSolution(rpn), 0);
 
 	expr = "(15-10)+5";
-	ASSERT_NO_THROW(conv.getExpr(expr));
 	rpn = conv.getExpr(expr);
-	ASSERT_NO_THROW(sol.GetSolution(rpn));
 	EXPECT_EQ(sol.GetSolution(rpn), 10);
 }
 
 TEST(Calculation, Brackets_NotEqualPriorities) {
-	CheckerCollectionInterface* col = new MyCheckerCollection();
-	string expr = "(2+2)*2";
-	ConverterRPN conv(col);
-	ASSERT_NO_THROW(conv.getExpr(expr));
-	vector<OperationInterface*> rpn = conv.getExpr(expr);
-	RPNSolver sol;
-	ASSERT_NO_THROW(sol.GetSolution(rpn));
+	expr = "(2+2)*2";
+	rpn = conv.getExpr(expr);
 	EXPECT_EQ(sol.GetSolution(rpn), 8);
 
 	expr = "2+(2*2)";
-	ASSERT_NO_THROW(conv.getExpr(expr));
 	rpn = conv.getExpr(expr);
-	ASSERT_NO_THROW(sol.GetSolution(rpn));
 	EXPECT_EQ(sol.GetSolution(rpn), 6);
 }
 
 TEST(Calculation, DivisionByZero) {
-	CheckerCollectionInterface* col = new MyCheckerCollection();
-	string expr = "(25+13)/0";
-	ConverterRPN conv(col);
-	ASSERT_NO_THROW(conv.getExpr(expr));
-	vector<OperationInterface*> rpn = conv.getExpr(expr);
-	RPNSolver sol;
+	expr = "(25+13)/0";
+	rpn = conv.getExpr(expr);
 	ASSERT_THROW(sol.GetSolution(rpn), invalid_argument);
 }
 
@@ -139,12 +102,13 @@ TEST(AddNewOp, DegreeOp) {
 		};
 	};
 
-	class DegToken : public BinaryOperations {
+	class DegToken : public TokenInterface {
 	public:
 		DegToken(string _value = "^") {
 			value = _value;
+			type = INFIX;
 		}
-		int getPriority() override { return VHighPr };
+		int getPriority() override { return VERY_HIGH_PRIORITY; };
 		OperationInterface* getOp() override {
 			return new DegOp(value);
 		}
@@ -160,28 +124,11 @@ TEST(AddNewOp, DegreeOp) {
 		}
 	};
 
-	class MyCheckerCollection_2 : public CheckerCollectionInterface {
-	public:
-		vector<TokenCheckerInterface*> getCheckers() override {
-			vector<TokenCheckerInterface*> temp;
-			temp.push_back(new NumberChecker);
-			temp.push_back(new SumChecker);
-			temp.push_back(new DifChecker);
-			temp.push_back(new MulChecker);
-			temp.push_back(new DivChecker);
-			temp.push_back(new RoundOpenBrChecker);
-			temp.push_back(new RoundCloseBrChecker);
-			temp.push_back(new DegChecker);
-			return temp;
-		}
-	};
-
-	CheckerCollectionInterface* col = new MyCheckerCollection_2();
-	string expr = "3+3*3^3";
-	ConverterRPN conv(col);
-	ASSERT_NO_THROW(conv.getExpr(expr));
-	vector<OperationInterface*> rpn = conv.getExpr(expr);
-	RPNSolver sol;
-	ASSERT_NO_THROW(sol.GetSolution(rpn));
+	CheckerCollection* col_2 = CheckerCollection::getBasics();
+	col_2->add(new DegChecker);
+	
+	expr = "3+3*3^3";
+	ConverterRPN conv_2(col_2);
+	rpn = conv_2.getExpr(expr);
 	EXPECT_EQ(sol.GetSolution(rpn), 84);
 }

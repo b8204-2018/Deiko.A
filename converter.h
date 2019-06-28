@@ -24,7 +24,7 @@ class ConverterRPN : public ConverterInterface {
     vector<OperationInterface*> convertToRPN(vector<TokenInterface*>);
     string deleteSpaces(string);
 public:
-    ConverterRPN(CheckerCollectionInterface* checkers = nullptr){
+	ConverterRPN(CheckerCollection* checkers = CheckerCollection::getBasics()) {
         RPNChecker = new BigChecker(checkers);
     };
     vector<OperationInterface*> getExpr(string input) override {

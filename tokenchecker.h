@@ -21,8 +21,8 @@ public:
 class NumberChecker : public TokenCheckerInterface {
 public:
     bool check(string str) override {
-		bool flag = regex_match(str, regex("([0-9])+\\.([0-9])*")) || regex_match(str, regex("([0-9])+"));
-		return flag;
+		//return regex_match(str, regex("([0-9])+\\.([0-9])*")) || regex_match(str, regex("([0-9])+"));
+		return regex_match(str, regex("\\d+(?:\\.\\d*)?"));
     }
     TokenInterface* getToken(string str){
         return new NumberToken(str);
@@ -89,31 +89,40 @@ public:
     }
 };
 
+/*
 class CheckerCollectionInterface{
 public:
     virtual std::vector<TokenCheckerInterface*> getCheckers() = 0;
 };
+*/
 
-class MyCheckerCollection : public CheckerCollectionInterface{
+class CheckerCollection{
+	vector<TokenCheckerInterface*> collection;
 public:
-    vector<TokenCheckerInterface*> getCheckers() override {
-        vector<TokenCheckerInterface*> temp;
-        temp.push_back(new NumberChecker);
-        temp.push_back(new SumChecker);
-        temp.push_back(new DifChecker);
-        temp.push_back(new MulChecker);
-        temp.push_back(new DivChecker);
-        temp.push_back(new RoundOpenBrChecker);
-        temp.push_back(new RoundCloseBrChecker);
-        return temp;
-    }
+	void add(TokenCheckerInterface* token) {
+		collection.push_back(token);
+	}
+	static CheckerCollection* getBasics() {
+		CheckerCollection* temp = new CheckerCollection;
+		temp->add(new NumberChecker);
+		temp->add(new SumChecker);
+		temp->add(new DifChecker);
+		temp->add(new MulChecker);
+		temp->add(new DivChecker);
+		temp->add(new RoundOpenBrChecker);
+		temp->add(new RoundCloseBrChecker);
+		return temp;
+	}
+	vector<TokenCheckerInterface*> getCheckers() {
+		return collection;
+	}
 };
 
 class BigChecker{
     vector<TokenCheckerInterface*> checkers;
 public:
 	BigChecker() {}
-    BigChecker(CheckerCollectionInterface* collection){
+    BigChecker(CheckerCollection* collection = CheckerCollection::getBasics()){
         checkers = collection->getCheckers();
     }
     ~BigChecker(){
