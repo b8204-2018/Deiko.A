@@ -1,2 +1,0 @@
-# Deiko.A
-myrep
